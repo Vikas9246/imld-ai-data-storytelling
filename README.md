@@ -1,4 +1,3 @@
-```markdown
 # AI-Powered Data Storytelling
 
 **IMLD Visual Computing Team Project – Summer Semester 2026**  
@@ -43,31 +42,14 @@ Optionally, a small user study can be conducted to validate the results.
 
 ---
 
-## 📁 Repository Structure
-
-```
-imld-ai-data-storytelling/
-├── .streamlit/
-│   └── secrets.toml          <-- ignored by git (holds API key)
-├── data/
-│   └── data.csv              <-- WHO road traffic deaths dataset
-├── app.py                    <-- main Streamlit application
-├── requirements.txt          <-- Python dependencies
-├── README.md                 <-- this file
-└── .gitignore                <-- ignores secrets, __pycache__, etc.
-```
-
----
-
 ## 🚀 How to Run Locally
 
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/Vikas9246/imld-ai-data-storytelling.git
 cd imld-ai-data-storytelling
-```
 
-### 2. Install dependencies
+2. Install dependencies
 Make sure you have Python 3.10+ installed. Then:
 
 ```bash
