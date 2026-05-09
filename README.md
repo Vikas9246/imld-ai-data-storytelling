@@ -10,10 +10,10 @@ Supervisors: Prof. Dr.-Ing. Raimund Dachselt, Susmita Khadse M.Sc., Julián Mén
 
 | Name | Matriculation | Role |
 |------|---------------|------|
-| Vikash Yadav | ... | Developer / Coordinator |
-| *Add teammate* | ... | ... |
-| *Add teammate* | ... | ... |
-| *Add teammate* | ... | ... |
+| Vikash Yadav | 5317730  | Developer |
+| Tongtong Li | 5191050  | ... |
+| Xueyi Bai | 5317603 | ... |
+| Xintong Yang | 5330580 | ... |
 
 ---
 
@@ -48,9 +48,9 @@ Optionally, a small user study can be conducted to validate the results.
 ```bash
 git clone https://github.com/Vikas9246/imld-ai-data-storytelling.git
 cd imld-ai-data-storytelling
-
-2. Install dependencies
-Make sure you have Python 3.10+ installed. Then:
+```
+### 2. Install dependencies 
+-Make sure you have Python 3.10+ installed. Then:
 
 ```bash
 pip install -r requirements.txt
