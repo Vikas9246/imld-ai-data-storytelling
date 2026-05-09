@@ -5,7 +5,6 @@ Technische Universität Dresden | CMS Master
 Supervisors: Prof. Dr.-Ing. Raimund Dachselt, Susmita Khadse M.Sc., Julián Méndez M.Sc.
 Course page: [https://imld.de/en/study/teaching/ss_26/cms-tea_26/](https://imld.de/en/study/teaching/ss_26/cms-tea_26/)
 
----
 
 ## 👥 Team
 
@@ -16,7 +15,6 @@ Course page: [https://imld.de/en/study/teaching/ss_26/cms-tea_26/](https://imld.
 | Xueyi Bai | 5317603 | ... |
 | Xintong Yang | 5330580 | ... |
 
----
 
 ## 📖 Project Overview
 
@@ -29,7 +27,6 @@ This repository contains a browser‑based prototype that compares three version
 The interface displays visualisations, side‑by‑side story comparison, and automatic evaluation metrics (readability, sentiment, factual consistency).  
 Optionally, a small user study can be conducted to validate the results.
 
----
 
 ## ✨ Features
 
@@ -41,7 +38,6 @@ Optionally, a small user study can be conducted to validate the results.
 - 🔐 API key kept secure using Streamlit secrets  
 - 📦 Clean, modular codebase ready for collaboration
 
----
 
 ## 🚀 How to Run Locally
 
@@ -73,7 +69,6 @@ streamlit run app.py
 ```
 The app will open in your browser at `http://localhost:8501`.
 
----
 
 ## 📊 Dataset
 
@@ -87,7 +82,6 @@ The app will open in your browser at `http://localhost:8501`.
 
 *Source: World Health Organization – Global Health Observatory (or Kaggle public subset).*
 
----
 
 ## 🧪 Evaluation
 
@@ -102,7 +96,6 @@ The app supports two evaluation modes:
    - Questionnaire with Likert scales (readability, trust, emotional engagement, comprehension)  
    - Results analysed via descriptive statistics / t‑tests.
 
----
 
 ## 📋 Deliverables Checklist
 
@@ -112,7 +105,6 @@ The app supports two evaluation modes:
 - [ ] Final report with evaluation (due August 16)  
 - [ ] Project presentation slides (interim: June 22, final: August 10)
 
----
 
 ## 🛠️ Technology Stack
 
@@ -122,13 +114,11 @@ The app supports two evaluation modes:
 - **Evaluation:** Textstat, VADER Sentiment, regex  
 - **Version Control:** Git & GitHub
 
----
 
 ## 📝 License
 
 This project is created for academic purposes at TU Dresden. All rights reserved unless otherwise noted.
 
----
 
 ## 📧 Contact
 
