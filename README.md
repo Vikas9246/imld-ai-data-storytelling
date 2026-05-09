@@ -1,8 +1,9 @@
 # AI-Powered Data Storytelling
 
 **IMLD Visual Computing Team Project – Summer Semester 2026**  
-Technische Universität Dresden | CMS Master (CLS Track)  
+Technische Universität Dresden | CMS Master 
 Supervisors: Prof. Dr.-Ing. Raimund Dachselt, Susmita Khadse M.Sc., Julián Méndez M.Sc.
+Course page: [https://imld.de/en/study/teaching/ss_26/cms-tea_26/](https://imld.de/en/study/teaching/ss_26/cms-tea_26/)
 
 ---
 
