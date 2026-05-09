@@ -123,4 +123,3 @@ This project is created for academic purposes at TU Dresden. All rights reserved
 ## 📧 Contact
 
 For questions about this repository, contact the team via the course supervisors or open an issue on GitHub.
-```
