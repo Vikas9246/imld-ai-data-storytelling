@@ -121,7 +121,7 @@ for key in ["rating_human", "rating_llm", "rating_enhanced"]:
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader(":writing_hand: Human‑Written Story")
+    st.subheader("✍️ Human‑Written Story")
     st.markdown(human_story)
     st.caption(f"**Readability (Flesch):** {readability_score(human_story)}  |  **Sentiment (compound):** {sentiment_scores(human_story):.2f}")
     # Star rating for human story
@@ -130,7 +130,7 @@ with col1:
         st.caption(f"You rated this story {rating_human + 1} / 5 stars")
 
 with col2:
-    st.subheader(":robot_face: LLM‑Generated Story")
+    st.subheader("🤖 LLM‑Generated Story")
     if st.session_state.llm_story:
         st.markdown(st.session_state.llm_story)
         st.caption(f"**Readability:** {readability_score(st.session_state.llm_story)}  |  **Sentiment:** {sentiment_scores(st.session_state.llm_story):.2f}")
@@ -165,7 +165,7 @@ with col_btn2:
 # ---------- Agentic enhancement ----------
 if st.session_state.llm_story:
     st.markdown("---")
-    st.subheader(":performing_arts: Agentic Emotional Enhancement")
+    st.subheader("🎭 Agentic Emotional Enhancement")
     emotion = st.selectbox("Choose emotional tone:", ["empathetic", "alarming", "hopeful", "neutral"], key="emotion")
     col_enhance, col_reset_enhance = st.columns([2, 1])
     with col_enhance:
