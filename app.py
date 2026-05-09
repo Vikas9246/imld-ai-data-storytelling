@@ -63,7 +63,6 @@ def factual_check(story, data_summary):
     return len(extra) == 0, extra
 
 def highlight_diff(original, modified):
-    """Return HTML string with changes highlighted."""
     diff = difflib.ndiff(original.split(), modified.split())
     html_parts = []
     for word in diff:
@@ -113,25 +112,37 @@ if "enhanced_story" not in st.session_state:
     st.session_state.enhanced_story = ""
 if "show_diff" not in st.session_state:
     st.session_state.show_diff = False
+# Star ratings – store per version
+for key in ["rating_human", "rating_llm", "rating_enhanced"]:
+    if key not in st.session_state:
+        st.session_state[key] = None
 
 # ---------- UI: Column layout ----------
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("✍️ Human‑Written Story")
+    st.subheader(":writing_hand: Human‑Written Story")
     st.markdown(human_story)
     st.caption(f"**Readability (Flesch):** {readability_score(human_story)}  |  **Sentiment (compound):** {sentiment_scores(human_story):.2f}")
+    # Star rating for human story
+    rating_human = st.feedback("stars", key="rating_human")
+    if rating_human is not None:
+        st.caption(f"You rated this story {rating_human + 1} / 5 stars")
 
 with col2:
-    st.subheader("🤖 LLM‑Generated Story")
+    st.subheader(":robot_face: LLM‑Generated Story")
     if st.session_state.llm_story:
         st.markdown(st.session_state.llm_story)
         st.caption(f"**Readability:** {readability_score(st.session_state.llm_story)}  |  **Sentiment:** {sentiment_scores(st.session_state.llm_story):.2f}")
         ok, extra_nums = factual_check(st.session_state.llm_story, data_summary)
         if ok:
-            st.success("✅ Fact check: all numbers match dataset")
+            st.success(":white_check_mark: Fact check: all numbers match dataset")
         else:
-            st.warning(f"⚠️ Extra numbers not in dataset: {extra_nums}")
+            st.warning(f":warning: Extra numbers not in dataset: {extra_nums}")
+        # Star rating for LLM story
+        rating_llm = st.feedback("stars", key="rating_llm")
+        if rating_llm is not None:
+            st.caption(f"You rated this story {rating_llm + 1} / 5 stars")
     else:
         st.info("Click the button below to generate a story.")
 
@@ -154,7 +165,7 @@ with col_btn2:
 # ---------- Agentic enhancement ----------
 if st.session_state.llm_story:
     st.markdown("---")
-    st.subheader("🎭 Agentic Emotional Enhancement")
+    st.subheader(":performing_arts: Agentic Emotional Enhancement")
     emotion = st.selectbox("Choose emotional tone:", ["empathetic", "alarming", "hopeful", "neutral"], key="emotion")
     col_enhance, col_reset_enhance = st.columns([2, 1])
     with col_enhance:
@@ -176,18 +187,52 @@ if st.session_state.llm_story:
         st.caption(f"**Readability:** {readability_score(st.session_state.enhanced_story)}  |  **Sentiment:** {sentiment_scores(st.session_state.enhanced_story):.2f}")
         ok_en, extra_en = factual_check(st.session_state.enhanced_story, data_summary)
         if ok_en:
-            st.success("✅ Fact check: all numbers match dataset")
+            st.success(":white_check_mark: Fact check: all numbers match dataset")
         else:
-            st.warning(f"⚠️ Extra numbers found: {extra_en}")
+            st.warning(f":warning: Extra numbers found: {extra_en}")
+        # Star rating for enhanced story
+        rating_enhanced = st.feedback("stars", key="rating_enhanced")
+        if rating_enhanced is not None:
+            st.caption(f"You rated this story {rating_enhanced + 1} / 5 stars")
 
-        # Diff view
         if st.session_state.show_diff:
-            with st.expander("🔍 See what changed (diff view)"):
+            with st.expander(":mag: See what changed (diff view)"):
                 diff_html = highlight_diff(st.session_state.llm_story, st.session_state.enhanced_story)
                 st.markdown(diff_html, unsafe_allow_html=True)
 
+# ---------- Download report ----------
+st.markdown("---")
+st.subheader(":page_facing_up: Download Report")
+if st.button("Generate Download"):
+    report = f"""AI-Powered Data Storytelling – Project Report
+{'='*60}
+
+HUMAN-WRITTEN STORY
+Readability (Flesch): {readability_score(human_story)} | Sentiment (compound): {sentiment_scores(human_story):.2f}
+{human_story}
+
+LLM-GENERATED STORY
+Readability (Flesch): {readability_score(st.session_state.llm_story) if st.session_state.llm_story else 'N/A'} | Sentiment: {sentiment_scores(st.session_state.llm_story) if st.session_state.llm_story else 'N/A':.2f}
+{st.session_state.llm_story if st.session_state.llm_story else 'Not yet generated.'}
+
+ENHANCED STORY (Agentic)
+Readability (Flesch): {readability_score(st.session_state.enhanced_story) if st.session_state.enhanced_story else 'N/A'} | Sentiment: {sentiment_scores(st.session_state.enhanced_story) if st.session_state.enhanced_story else 'N/A':.2f}
+{st.session_state.enhanced_story if st.session_state.enhanced_story else 'Not yet generated.'}
+
+Star Ratings:
+- Human story: {st.session_state.get('rating_human', 'N/A')}
+- LLM story: {st.session_state.get('rating_llm', 'N/A')}
+- Enhanced story: {st.session_state.get('rating_enhanced', 'N/A')}
+"""
+    st.download_button(
+        label=":arrow_down: Download Report as .txt",
+        data=report,
+        file_name="data_story_report.txt",
+        mime="text/plain"
+    )
+
 # ---------- Dataset chart ----------
 st.markdown("---")
-st.subheader("📊 Dataset Overview")
+st.subheader(":bar_chart: Dataset Overview")
 chart_data = df.pivot(index="year", columns="country", values="road_traffic_deaths_per_100k")
 st.line_chart(chart_data)
