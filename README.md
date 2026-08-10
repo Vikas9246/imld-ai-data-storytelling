@@ -12,7 +12,7 @@ Course page: <https://imld.de/en/study/teaching/ss_26/cms-tea_26/>
 | Name | Matriculation | Role |
 |---|---|---|
 | Vikash Yadav | 5317730 | Developer / Coordinator |
-| Tongtong Li | 5191050 | Literature Review / Report |
+| Tongtong Li | 5191050 | Literature Review / Interface Design |
 | Xueyi Bai | 5317603 | Interface Design / Developer |
 | Xintong Yang | 5330580 | Data Analysis / Human Story |
 
