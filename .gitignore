@@ -10,3 +10,8 @@ venv/
 # OS junk
 .DS_Store
 Thumbs.db
+
+#cache
+academic.png
+financial.png
+sleep.png
