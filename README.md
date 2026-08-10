@@ -13,7 +13,7 @@ Course page: <https://imld.de/en/study/teaching/ss_26/cms-tea_26/>
 |---|---|---|
 | Vikash Yadav | 5317730 | Developer / Coordinator |
 | Tongtong Li | 5191050 | Literature Review / Report |
-| Xueyi Bai | 5317603 | Interface Design / Slides |
+| Xueyi Bai | 5317603 | Interface Design / Developer |
 | Xintong Yang | 5330580 | Data Analysis / Human Story |
 
 ---
@@ -49,7 +49,7 @@ Download the CSV from Kaggle and save it as `data/data.csv` before running.
 
 ### Data Visualisation
 - Three interactive **Plotly bar charts** (academic pressure, financial stress, sleep duration vs depression rate)
-- Click any bar to **highlight matching sentences** across all three story columns simultaneously
+- Click any charts'selection to **highlight matching sentences** across all three story columns simultaneously
 
 ### Story Comparison
 - Side-by-side display of human-written, LLM-generated, and agentic-enhanced stories
@@ -74,7 +74,7 @@ Download the CSV from Kaggle and save it as `data/data.csv` before running.
 - Human story adapts to filters: female variant (Priya) and sleep-deprivation variant
 
 ### Download
-- **Report export** (.txt) with all story versions, metrics, filter state, and ratings
+- **Report export** (pdf) with all story versions, metrics, filter state, and ratings, downloading with single story or compare all, figures included as well.
 
 ---
 
@@ -94,6 +94,11 @@ cd imld-ai-data-storytelling
 pip install -r requirements.txt
 ```
 
+## Additional dependencies
+
+- `reportlab` – PDF generation
+- `kaleido` – Plotly image export
+
 ### API Key
 
 Create `.streamlit/secrets.toml`:
@@ -108,7 +113,8 @@ This file is in `.gitignore` and is never committed.
 
 ```bash
 # Standard Python
-streamlit run app.py
+streamlit run app.py #(original)
+streamlit run app_redesign.py #(updated)
 
 # Anaconda
 C:\Users\vikash\anaconda3\python.exe -m streamlit run app.py
