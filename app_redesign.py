@@ -29,85 +29,684 @@ from reportlab.lib import colors
 st.set_page_config(
     page_title="AI-Powered Data Storytelling – Student Depression",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # ─────────────────────────────────────────────
-#  Custom CSS  – clean, readable, presentation-ready
+#  Theme-aware presentation layer
 # ─────────────────────────────────────────────
 st.markdown(
     """
     <style>
-
-    .story-card-marker {
-    display: none;
+    :root {
+        --kyoto-dusk: #5B5E9D;
+        --matcha-cream: #9BB29E;
+        --roasted-terracotta: #DA6B51;
+        --vanilla-foam: #F1DCBA;
+        --charcoal-brew: #484149;
+        --page-canvas: color-mix(in srgb, var(--vanilla-foam) 18%, transparent);
+        --control-border: color-mix(in srgb, var(--kyoto-dusk) 46%, transparent);
+        --control-hover: color-mix(in srgb, var(--kyoto-dusk) 12%, transparent);
+        --control-selected: color-mix(in srgb, var(--kyoto-dusk) 24%, transparent);
     }
 
+    .stApp {
+        color: var(--text-color, inherit);
+        background-color: var(--page-canvas) !important;
+        background-image: none !important;
+    }
+
+    [data-testid="stAppViewContainer"],
+    section[data-testid="stMain"],
+    [data-testid="stMainBlockContainer"],
+    .block-container {
+        color: inherit;
+        background-color: transparent !important;
+        background-image: none !important;
+    }
+
+    .block-container {
+        padding-top: 0;
+    }
+
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
+
+    section[data-testid="stSidebar"] > div {
+        background-color: color-mix(in srgb, var(--page-canvas) 92%, var(--matcha-cream) 8%);
+    }
+
+    [data-testid="stAppViewContainer"] > section,
+    section[data-testid="stMain"] {
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+    }
+
+    .cover-section-marker,
+    .compare-section-marker {
+        display: none;
+    }
+
+    .workspace-section-marker {
+        width: 1px;
+        height: 500vh;
+        position: absolute;
+        display: block;
+        pointer-events: none;
+        scroll-snap-align: start;
+        scroll-snap-stop: normal;
+    }
+
+    [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .cover-section-marker),
+    [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .compare-section-marker) {
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        scroll-margin-top: 0.35rem;
+    }
+
+    [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .cover-section-marker),
+    [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .compare-section-marker) {
+        min-height: clamp(40rem, calc(100vh - 3.5rem), 64rem);
+    }
+
+    [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .cover-section-marker) {
+        width: calc(100% + clamp(4rem, 10vw, 10rem));
+        max-width: none;
+        margin-inline: calc(clamp(2rem, 5vw, 5rem) * -1);
+    }
+
+    .cover-section {
+        min-height: clamp(40rem, calc(100vh - 3.5rem), 64rem);
+        display: grid;
+        grid-template-columns: minmax(0, 58fr) minmax(20rem, 42fr);
+        overflow: hidden;
+        position: relative;
+        isolation: isolate;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+    }
+
+    .cover-copy-panel {
+        min-width: 0;
+        padding: clamp(3rem, 7vh, 5.75rem) clamp(2rem, 4.5vw, 5rem);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 2;
+        background: transparent;
+    }
+
+    .cover-geometry {
+        min-width: 0;
+        position: relative;
+        overflow: hidden;
+        background: var(--kyoto-dusk);
+        pointer-events: none;
+    }
+
+    .poster-module {
+        width: clamp(13rem, 22vw, 27rem);
+        aspect-ratio: 1;
+        position: absolute;
+        right: clamp(-7rem, -4vw, -2.5rem);
+        display: block;
+    }
+
+    .poster-module-one {
+        top: clamp(-6rem, -7vh, -2.5rem);
+        border-radius: 0 0 999px 999px;
+        background: var(--roasted-terracotta);
+    }
+
+    .poster-module-two {
+        top: 33%;
+        right: clamp(4rem, 5vw, 7rem);
+        border-radius: 999px 999px 0 0;
+        background: var(--matcha-cream);
+    }
+
+    .poster-module-three {
+        bottom: clamp(-7rem, -8vh, -3rem);
+        border-radius: 999px 999px 0 0;
+        background: var(--vanilla-foam);
+    }
+
+    .project-header {
+        width: min(100%, 52rem);
+        position: relative;
+        z-index: 1;
+    }
+
+    [data-testid="stMarkdownContainer"] h1.project-title {
+        margin: 0;
+        color: currentColor;
+        font-size: clamp(72px, 6.2vw, 132px);
+        font-weight: 850;
+        letter-spacing: -0.055em;
+        line-height: 0.86;
+        text-wrap: nowrap;
+    }
+
+    .project-title-line {
+        display: block;
+        white-space: nowrap;
+    }
+
+    .project-subtitle {
+        width: min(82%, 35rem);
+        margin: clamp(1.15rem, 2.5vh, 1.8rem) 0 0;
+        color: color-mix(in srgb, currentColor 82%, var(--matcha-cream));
+        font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+        line-height: 1.55;
+        text-wrap: balance;
+    }
+
+    .cover-footer {
+        margin-top: auto;
+    }
+
+    .cover-labels {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: clamp(0.8rem, 1.4vw, 1.35rem);
+    }
+
+    .cover-label {
+        display: grid;
+        grid-template-rows: auto auto;
+        align-content: end;
+        gap: 0.18rem;
+        min-width: 0;
+        padding-bottom: 0.55rem;
+        border-bottom: 3px solid var(--label-accent);
+        color: currentColor;
+        font-size: clamp(0.68rem, 0.72vw, 0.76rem);
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .cover-label-number {
+        color: var(--label-accent);
+        font-weight: 850;
+    }
+
+    .cover-label-text { overflow: hidden; text-overflow: clip; }
+
+    .cover-scroll-cue {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        position: absolute;
+        right: clamp(1.5rem, 3vw, 3rem);
+        bottom: clamp(1.5rem, 3.5vh, 2.5rem);
+        z-index: 3;
+        color: var(--vanilla-foam);
+        font-size: 0.7rem;
+        font-weight: 750;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .cover-scroll-line {
+        width: 1px;
+        height: 2.7rem;
+        position: relative;
+        background: currentColor;
+    }
+
+    .cover-scroll-line::after {
+        content: "";
+        width: 0.42rem;
+        height: 0.42rem;
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        border-right: 1px solid currentColor;
+        border-bottom: 1px solid currentColor;
+        transform: translateX(-50%) rotate(45deg);
+    }
+
+    .narrative-section {
+        padding: clamp(2.5rem, 6vh, 4.5rem) 0;
+    }
+
+    .chapter-kicker {
+        margin: 0 0 0.45rem;
+        color: var(--kyoto-dusk);
+        font-size: 0.75rem;
+        font-weight: 750;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .chapter-title {
+        margin: 0;
+        color: var(--text-color, currentColor);
+        font-size: clamp(1.85rem, 3.4vw, 3rem);
+        font-weight: 750;
+        letter-spacing: -0.025em;
+        line-height: 1.12;
+    }
+
+    .chapter-lead {
+        max-width: 52rem;
+        margin: 0.7rem 0 1.75rem;
+        color: color-mix(in srgb, currentColor 70%, var(--matcha-cream));
+        font-size: clamp(0.95rem, 1.25vw, 1.08rem);
+        line-height: 1.55;
+    }
+
+    .method-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: clamp(0.8rem, 1.6vw, 1.25rem);
+    }
+
+    .method-card,
+    .measure-card {
+        border: 1px solid color-mix(in srgb, var(--matcha-cream) 48%, transparent);
+        border-radius: 14px;
+        background: color-mix(in srgb, currentColor 4%, transparent);
+    }
+
+    .method-card {
+        min-height: 13rem;
+        padding: 1.15rem 1.2rem 1.25rem;
+        border-top: 4px solid var(--method-accent);
+    }
+
+    .method-number {
+        color: var(--method-accent);
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+    }
+
+    .method-title,
+    .measure-title {
+        color: var(--text-color, currentColor);
+        font-weight: 720;
+    }
+
+    .method-title {
+        margin: 1rem 0 0.6rem;
+        font-size: 1.1rem;
+    }
+
+    .method-copy,
+    .measure-copy,
+    .measure-range {
+        color: color-mix(in srgb, currentColor 70%, var(--matcha-cream));
+        line-height: 1.55;
+    }
+
+    .method-copy { font-size: 0.9rem; }
+
+    .measure-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: clamp(0.8rem, 1.6vw, 1.25rem);
+        margin-top: 1rem;
+    }
+
+    .measure-card {
+        min-height: 12.25rem;
+        padding: 1rem 1.15rem 1.05rem;
+        display: grid;
+        grid-template-rows: auto auto auto 1fr auto;
+        border: 0;
+        border-radius: 2px;
+        border-top: 5px solid var(--measure-accent);
+        background: color-mix(in srgb, currentColor 5%, transparent);
+    }
+
+    .measure-heading {
+        display: flex;
+        justify-content: space-between;
+        color: color-mix(in srgb, currentColor 74%, var(--matcha-cream));
+        font-size: 0.7rem;
+        font-weight: 850;
+        letter-spacing: 0.13em;
+    }
+
+    .measure-number { color: var(--measure-accent); }
+    .measure-value {
+        margin-top: 0.4rem;
+        color: var(--text-color, currentColor);
+        font-size: clamp(2rem, 3vw, 3.15rem);
+        font-weight: 820;
+        letter-spacing: -0.045em;
+        line-height: 1;
+    }
+    .measure-name {
+        margin-top: 0.15rem;
+        color: var(--text-color, currentColor);
+        font-size: 0.9rem;
+        font-weight: 720;
+    }
+    .measure-copy { margin-top: 0.35rem; font-size: 0.78rem; }
+    .metric-scale { margin-top: 0.7rem; }
+    .scale-labels,
+    .scale-values {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        align-items: end;
+        font-size: 0.6rem;
+        font-weight: 760;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+    .scale-labels span:nth-child(2), .scale-values span:nth-child(2) { text-align: center; }
+    .scale-labels span:last-child, .scale-values span:last-child { text-align: right; }
+    .scale-labels .negative { color: var(--roasted-terracotta); }
+    .scale-labels .neutral { color: var(--kyoto-dusk); }
+    .scale-labels .positive { color: var(--matcha-cream); }
+    .scale-track {
+        height: 4px;
+        margin: 0.35rem 0 0.25rem;
+        display: grid;
+        grid-template-columns: 40fr 20fr 40fr;
+        background: currentColor;
+    }
+    .scale-track span:nth-child(1) { background: var(--roasted-terracotta); }
+    .scale-track span:nth-child(2) { background: var(--kyoto-dusk); }
+    .scale-track span:nth-child(3) { background: var(--matcha-cream); }
+    .sentiment-scale .scale-track { grid-template-columns: repeat(2, 1fr); position: relative; }
+    .sentiment-scale .scale-track::before,
+    .sentiment-scale .scale-track::after,
+    .sentiment-scale .scale-midpoint {
+        content: "";
+        width: 0.55rem;
+        height: 0.55rem;
+        position: absolute;
+        top: 50%;
+        border: 2px solid var(--background-color, #fff);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .sentiment-scale .scale-track::before { left: 0; background: var(--roasted-terracotta); }
+    .sentiment-scale .scale-track::after { left: 100%; background: var(--matcha-cream); }
+    .sentiment-scale .scale-midpoint { left: 50%; background: var(--kyoto-dusk); }
+
+    .workspace-heading {
+        padding-top: clamp(2.5rem, 6vh, 4.5rem);
+    }
+
+    .workspace-heading .chapter-lead { margin-bottom: 0.5rem; }
+
+    .section-heading,
+    .story-heading {
+        color: var(--text-color, currentColor);
+        font-weight: 720;
+        line-height: 1.2;
+    }
+
+    .section-heading {
+        margin: 0.35rem 0 0.65rem;
+        font-size: clamp(1.08rem, 1.6vw, 1.35rem);
+    }
+
+    .story-heading {
+        min-height: 2.8rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+    }
+
+    .story-heading.human { border-top: 3px solid var(--matcha-cream); }
+    .story-heading.gemini { border-top: 3px solid var(--kyoto-dusk); }
+
+    .story-meta {
+        min-height: 2.7rem;
+        margin: 0.25rem 0 0.45rem;
+        color: color-mix(in srgb, currentColor 68%, var(--matcha-cream));
+        font-size: 0.82rem;
+        line-height: 1.4;
+    }
+
+    .story-card-marker,
+    .dataset-controls-marker,
+    .agent-controls-marker,
+    .report-controls-marker,
+    .human-card-marker,
+    .gemini-card-marker {
+        display: none;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"]:has(.human-card-marker),
+    [data-testid="stVerticalBlockBorderWrapper"]:has(.gemini-card-marker),
     [data-testid="stVerticalBlockBorderWrapper"]:has(.story-card-marker) {
-        border-radius: 16px;
-        border: 1px solid rgba(150, 150, 160, 0.22);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
+        border-radius: 14px;
+        border: 1px solid color-mix(in srgb, var(--matcha-cream) 58%, transparent);
+        background: color-mix(in srgb, currentColor 4%, transparent);
+        box-shadow: 0 8px 22px color-mix(in srgb, #000 12%, transparent);
+        transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
     }
 
-    [data-testid="stVerticalBlockBorderWrapper"]:has(.story-card-marker):hover {
-        box-shadow: 0 9px 24px rgba(0, 0, 0, 0.15);
-        transform: translateY(-1px);
+    [data-testid="stVerticalBlockBorderWrapper"]:has(.human-card-marker) {
+        border-top: 3px solid var(--matcha-cream);
     }
 
-</style>
+    [data-testid="stVerticalBlockBorderWrapper"]:has(.gemini-card-marker) {
+        border-top: 3px solid var(--kyoto-dusk);
+    }
+
+    .story-scroll {
+        height: clamp(31rem, 53vh, 47.5rem);
+        overflow-y: auto;
+        padding-right: 0.55rem;
+        scrollbar-gutter: stable;
+    }
+
+    .story-box {
+        color: var(--text-color, currentColor);
+        line-height: 1.72;
+    }
+
+    .story-box p { margin: 0 0 0.9rem; }
+    .story-box p:last-child { margin-bottom: 0; }
+
+    .story-empty {
+        height: clamp(31rem, 53vh, 47.5rem);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        border-radius: 10px;
+        color: color-mix(in srgb, currentColor 70%, var(--matcha-cream));
+        background: color-mix(in srgb, currentColor 3%, transparent);
+        text-align: center;
+        line-height: 1.55;
+    }
+
+    .metric-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin: 0.45rem 0 0.8rem;
+        color: color-mix(in srgb, currentColor 75%, var(--matcha-cream));
+        font-size: 0.82rem;
+    }
+
+    .metric-pill {
+        padding: 0.2rem 0.65rem;
+        border: 1px solid color-mix(in srgb, var(--matcha-cream) 46%, transparent);
+        border-radius: 999px;
+        background: color-mix(in srgb, currentColor 5%, transparent);
+    }
+
+    .comparison-card {
+        height: 100%;
+        padding: 0.9rem 1rem;
+        border: 1px solid color-mix(in srgb, var(--matcha-cream) 48%, transparent);
+        border-top: 3px solid var(--card-accent);
+        border-radius: 12px;
+        background: color-mix(in srgb, currentColor 4%, transparent);
+    }
+
+    .comparison-card-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0.42rem 0;
+        color: color-mix(in srgb, currentColor 72%, var(--matcha-cream));
+        font-size: 0.85rem;
+    }
+
+    /* Scope nowrap rules to the compact navigation and report controls. */
+    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stButtonGroup"] button,
+    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stButtonGroup"] button,
+    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stButtonGroup"] button {
+        min-width: 0;
+        white-space: nowrap;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stButtonGroup"],
+    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stButtonGroup"],
+    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stButtonGroup"] {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        background: transparent !important;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]),
+    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]),
+    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]) {
+        width: 100% !important;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stButtonGroup"] > div,
+    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stButtonGroup"] > div,
+    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stButtonGroup"] > div {
+        display: flex;
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    [data-testid="stButtonGroup"] > div:has(> button[data-variant="segmented_control"]) {
+        display: flex;
+        width: 100% !important;
+        max-width: none !important;
+        flex: 1 1 100% !important;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stButtonGroup"] button,
+    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stButtonGroup"] button,
+    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stButtonGroup"] button {
+        flex: 1 1 0;
+        border-color: var(--control-border) !important;
+        background: transparent !important;
+        color: inherit !important;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [role="radio"][aria-checked="true"],
+    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [role="radio"][aria-checked="true"],
+    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [role="radio"][aria-checked="true"] {
+        border-color: var(--kyoto-dusk);
+        background: var(--control-selected) !important;
+        color: inherit !important;
+    }
+
+    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [role="radio"]:hover,
+    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [role="radio"]:hover,
+    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [role="radio"]:hover {
+        border-color: color-mix(in srgb, var(--kyoto-dusk) 68%, transparent);
+        background: var(--control-hover) !important;
+    }
+
+    div[data-testid="stButton"] button[kind="secondary"],
+    div[data-testid="stDownloadButton"] button[kind="secondary"] {
+        border-color: var(--control-border) !important;
+        background: transparent !important;
+        color: inherit !important;
+    }
+
+    div[data-testid="stButton"] button[kind="secondary"]:hover,
+    div[data-testid="stDownloadButton"] button[kind="secondary"]:hover {
+        border-color: var(--kyoto-dusk) !important;
+        background: var(--control-hover) !important;
+    }
+
+    div[data-testid="stButton"] button[kind="primary"],
+    div[data-testid="stDownloadButton"] button[kind="primary"] {
+        border-color: var(--roasted-terracotta);
+        background: var(--roasted-terracotta);
+        color: #fff;
+    }
+
+    [data-testid="stSelectbox"] [role="group"],
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+        border-color: var(--control-border) !important;
+        background: transparent !important;
+        color: inherit !important;
+    }
+
+    [data-testid="stPlotlyChart"],
+    [data-testid="stPlotlyChart"] .js-plotly-plot,
+    [data-testid="stPlotlyChart"] .plot-container,
+    [data-testid="stPlotlyChart"] .svg-container,
+    [data-testid="stPlotlyChart"] .modebar,
+    [data-testid="stPlotlyChart"] .modebar-group {
+        background: transparent !important;
+    }
+
+    button:focus-visible,
+    [role="radiogroup"] button:focus-visible,
+    a:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--kyoto-dusk) 72%, white);
+        outline-offset: 2px;
+    }
+
+    button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 900px) {
+        [data-testid="stVerticalBlock"]:has(> [data-testid="stElementContainer"] .cover-section-marker) {
+            width: calc(100% + 2rem);
+            margin-inline: -1rem;
+        }
+        .cover-section {
+            min-height: clamp(40rem, calc(100vh - 3.5rem), 64rem);
+            grid-template-columns: minmax(0, 64fr) minmax(12rem, 36fr);
+        }
+        .cover-copy-panel { padding: 3rem 1.5rem 2rem; }
+        .project-header { width: 100%; }
+        [data-testid="stMarkdownContainer"] h1.project-title {
+            font-size: clamp(52px, 7.4vw, 72px);
+        }
+        .project-subtitle { width: 100%; }
+        .poster-module { width: clamp(12rem, 25vw, 18rem); }
+        .method-grid { grid-template-columns: 1fr; }
+        .measure-grid { grid-template-columns: 1fr; }
+        .method-card { min-height: auto; }
+        .story-heading { min-height: 3.2rem; }
+        .story-scroll, .story-empty { height: 34rem; }
+    }
+
+    @media (max-width: 640px) {
+        .cover-labels { grid-template-columns: 1fr; }
+        .cover-label { white-space: normal; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        [data-testid="stAppViewContainer"] > section,
+        section[data-testid="stMain"] { scroll-behavior: auto; }
+    }
+    </style>
 """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
-# st.markdown("""
-# <style>
-#     .hero-section {
-#     padding: 1.2rem 1.4rem;
-#     margin-bottom: 1rem;
-#     border: 1px solid rgba(148, 163, 184, 0.16);
-#     border-radius: 18px;
-#     background:
-#         radial-gradient(
-#             circle at top right,
-#             rgba(99, 102, 241, 0.20),
-#             transparent 35%
-#         ),
-#         linear-gradient(
-#             135deg,
-#             #171827 0%,
-#             #111827 100%
-#         );
-#     box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
-# }
-
-# .hero-label {
-#     margin-bottom: 0 rem;
-#     color: #9ca3af;
-#     font-size: 0.72rem;
-#     font-weight: 700;
-#     letter-spacing: 0.14em;
-#     text-align:center;
-# }
-
-# .hero-section h1 {
-#     margin: 0;
-#     color: #f8fafc;
-#     font-size: 2.5rem;
-#     line-height: 1.15;
-#     text-align:center;
-# }
-
-# .hero-section p {
-#     max-width: 760px;
-#     margin: 1rem 0 1.4rem 0;
-#     color: #cbd5e1;
-#     font-size: 1.02rem;
-#     line-height: 1.7;
-# }
-
-
-# </style>
-# """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 #  Linked-visualisation: topics, keywords & colours
@@ -412,11 +1011,9 @@ def render_sentiment_arc(text):
         + "</div>"
     )
     legend = (
-        "<div style='font-size:0.72rem;color:#9e9e9e;margin-bottom:0.6rem;'>"
+        "<div style='font-size:0.72rem;color:color-mix(in srgb,currentColor 68%,#9BB29E);margin-bottom:0.6rem;'>"
         "<b style='letter-spacing:0.05em;'>EMOTIONAL TONE ARC (SENTENCE-LEVEL)</b> &nbsp;·&nbsp; "
-        "<span style='color:#ef5350;'>■</span> negative &nbsp; "
-        "<span style='color:#9e9e9e;'>■</span> neutral &nbsp; "
-        "<span style='color:#66bb6a;'>■</span> positive"
+        "negative &nbsp; neutral &nbsp; positive"
         "</div>"
     )
     st.markdown(legend + bar, unsafe_allow_html=True)
@@ -427,8 +1024,8 @@ def render_metrics(text, label=""):
     sentiment_label = "positive" if s > 0.05 else ("negative" if s < -0.05 else "neutral")
     st.markdown(
         f"<div class='metric-row'>"
-        f"<span class='metric-pill'>📖 Flesch: <b>{r}</b></span>"
-        f"<span class='metric-pill'>💬 Sentiment: <b>{s}</b> ({sentiment_label})</span>"
+        f"<span class='metric-pill'>Flesch: <b>{r}</b></span>"
+        f"<span class='metric-pill'>Sentiment: <b>{s}</b> ({sentiment_label})</span>"
         f"</div>",
         unsafe_allow_html=True,
     )
@@ -455,14 +1052,14 @@ def render_tone_shift(llm_text, enhanced_text, tone_name):
     p1, p2 = pos(llm_c), pos(enh_c)
     left, right = sorted([p1, p2])
     line_color = "#66bb6a" if enh_c > llm_c else ("#ef5350" if enh_c < llm_c else "#9e9e9e")
-    direction = ("▲ warmer / more positive" if enh_c > llm_c
-                 else ("▼ darker / more negative" if enh_c < llm_c else "→ unchanged"))
+    direction = ("warmer / more positive" if enh_c > llm_c
+                 else ("darker / more negative" if enh_c < llm_c else "unchanged"))
     block = f"""
     <div style='margin:0.4rem 0 0.9rem 0;'>
-      <div style='font-size:0.86rem;color:#bdbdbd;margin-bottom:0.55rem;'>
-        <b>Tone shift: LLM → Enhanced ({tone_name})</b>
+      <div style='font-size:0.86rem;color:color-mix(in srgb,currentColor 72%,#9BB29E);margin-bottom:0.55rem;'>
+        <b>Tone shift: LLM to Enhanced ({tone_name})</b>
         &nbsp; <span style='color:{line_color};font-weight:600;'>{direction}</span>
-        &nbsp; <span style='color:#9e9e9e;'>({llm_c:+.3f} → {enh_c:+.3f})</span>
+        &nbsp; <span>({llm_c:+.3f} to {enh_c:+.3f})</span>
       </div>
       <div style='position:relative;height:30px;'>
         <div style='position:absolute;top:12px;left:0;right:0;height:6px;border-radius:3px;
@@ -470,16 +1067,15 @@ def render_tone_shift(llm_text, enhanced_text, tone_name):
         <div style='position:absolute;top:13px;left:{left}%;width:{right-left}%;height:4px;
              background:{line_color};border-radius:2px;'></div>
         <div title='LLM ({llm_c:+.3f})' style='position:absolute;top:6px;left:calc({p1}% - 7px);
-             width:14px;height:14px;border-radius:50%;background:#ce93d8;border:2px solid #0e1117;'></div>
+             width:14px;height:14px;border-radius:50%;background:#5B5E9D;border:2px solid currentColor;'></div>
         <div title='Enhanced ({enh_c:+.3f})' style='position:absolute;top:6px;left:calc({p2}% - 7px);
-             width:14px;height:14px;border-radius:50%;background:#80cbc4;border:2px solid #0e1117;'></div>
+             width:14px;height:14px;border-radius:50%;background:#DA6B51;border:2px solid currentColor;'></div>
       </div>
       <div style='display:flex;justify-content:space-between;font-size:0.7rem;color:#777;margin-top:2px;'>
         <span>−1 negative</span><span>0 neutral</span><span>+1 positive</span>
       </div>
-      <div style='font-size:0.72rem;color:#9e9e9e;margin-top:3px;'>
-        <span style='color:#ce93d8;'>●</span> LLM &nbsp;
-        <span style='color:#80cbc4;'>●</span> Enhanced
+      <div style='font-size:0.72rem;color:color-mix(in srgb,currentColor 68%,#9BB29E);margin-top:3px;'>
+        LLM &nbsp; Enhanced
       </div>
     </div>
     """
@@ -490,22 +1086,20 @@ def render_comparison_card(label, story, data_summary, accent="#fff3b0"):
     s = sentiment_score(story)
     wc = len(story.split())
     ok, extra = factual_check(story, data_summary + "\n" + str(STATS))
-    fact = "✅ Pass" if ok else f"⚠️ {len(extra)} flag(s)"
+    fact = "Pass" if ok else f"{len(extra)} flag(s)"
     fact_color = "#81c784" if ok else "#ffb74d"
 
     def row(lbl, value_html):
-        return (f"<div style='display:flex;justify-content:space-between;align-items:center;"
-                f"margin:0.4rem 0;font-size:0.85rem;color:#bdbdbd;'>"
+        return (f"<div class='comparison-card-row'>"
                 f"<span>{lbl}</span>{value_html}</div>")
 
     card = (
-        f"<div style='background:#1e1e2e;border-top:3px solid {accent};border-radius:8px;"
-        f"padding:0.9rem 1.1rem;height:100%;'>"
+        f"<div class='comparison-card' style='--card-accent:{accent};'>"
         f"<div style='font-weight:700;color:{accent};margin-bottom:0.5rem;font-size:0.95rem;'>{label}</div>"
-        + row("📖 Readability", _badge(r, _readability_color(r)))
-        + row("💬 Sentiment", _badge(s, _sentiment_badge_color(s)))
-        + row("📝 Word count", f"<b style='color:#e0e0e0;'>{wc}</b>")
-        + row("🔍 Fact-check", f"<span style='color:{fact_color};font-weight:600;'>{fact}</span>")
+        + row("Readability", _badge(r, _readability_color(r)))
+        + row("Sentiment", _badge(s, _sentiment_badge_color(s)))
+        + row("Word count", f"<b>{wc}</b>")
+        + row("Fact-check", f"<span style='color:{fact_color};font-weight:600;'>{fact}</span>")
         + "</div>"
     )
     st.markdown(card, unsafe_allow_html=True)
@@ -732,27 +1326,23 @@ def enhance_story(original_story, summary, emotion="empathetic"):
 # ─────────────────────────────────────────────
 #  Visualisations  (interactive Plotly – linked to story highlighting)
 # ─────────────────────────────────────────────
-PLOT_BG   = "#1e1e2e"
-PAPER_BG  = "#0e1117"
-TEXT_CLR  = "#e0e0e0"
-GRID_CLR  = "#2a2a3e"
 
 def _style_fig(fig, title, xtitle, selected):
     fig.update_layout(
-        title=dict(text=title, font=dict(color=TEXT_CLR, size=13)),
+        title=dict(text=title, font=dict(size=13)),
         xaxis_title=xtitle,
         yaxis_title="Depression Rate (%)",
-        paper_bgcolor=PAPER_BG,
-        plot_bgcolor=PLOT_BG,
-        font=dict(color=TEXT_CLR, size=11),
+        font=dict(size=11),
         margin=dict(l=10, r=10, t=46, b=10),
         height=320,
         clickmode="event+select",
         dragmode=False,
         showlegend=False,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
     )
-    fig.update_xaxes(showgrid=False, color=TEXT_CLR)
-    fig.update_yaxes(showgrid=True, gridcolor=GRID_CLR, color=TEXT_CLR, zeroline=False)
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=True, zeroline=False)
     return fig
 
 def _bar_fig(labels, values, topic, base_color, title, xtitle, selected_topic):
@@ -768,19 +1358,19 @@ def _bar_fig(labels, values, topic, base_color, title, xtitle, selected_topic):
             marker_line_width=0,
             text=[f"{v}%" for v in values],
             textposition="outside",
-            textfont=dict(color=TEXT_CLR, size=11),
+            textfont=dict(size=11),
             hovertemplate="%{x}<br>Depression: %{y}%<extra>click to highlight</extra>",
         )
     )
     ymax = min(100, (max(values) if values else 0) + 15)
     fig.update_yaxes(range=[0, ymax])
-    title_marker = "  ●" if is_sel else ""
+    title_marker = " (selected)" if is_sel else ""
     return _style_fig(fig, title + title_marker, xtitle, is_sel)
 
 def make_academic_fig(stats, selected_topic=None):
     d = {k: v for k, v in sorted(stats["academic_pressure"].items())}
     return _bar_fig([str(int(k)) for k in d], list(d.values()), "academic_pressure",
-                    "#fff3b0", "Academic Pressure vs Depression",
+                    "#6c8ebf", "Academic Pressure vs Depression",
                     "Academic Pressure Level (1=Low, 5=High)", selected_topic)
 
 def make_financial_fig(stats, selected_topic=None):
@@ -812,7 +1402,7 @@ def sync_topic_from_view():
 #  Sidebar – filters & info
 # ─────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🎛️ Filters")
+    st.markdown("## Filters")
     st.caption("Adjust what the LLM story focuses on.")
 
     gender_options = ["All"] + sorted(df["Gender"].dropna().unique().tolist())
@@ -823,7 +1413,7 @@ with st.sidebar:
 
     # ── Subgroup snapshot (change #5) ───────────────────────────────
     st.markdown("---")
-    st.markdown("### 🔍 Subgroup snapshot")
+    st.markdown("### Subgroup snapshot")
 
     _sub = df.copy()
     _applied = []
@@ -857,13 +1447,13 @@ with st.sidebar:
                    "Pick a filter to compare a subgroup against this average.")
 
     st.markdown("---")
-    st.markdown("### 📊 Dataset Info")
+    st.markdown("### Dataset Info")
     st.metric("Total Students", f"{STATS['total']:,}")
     st.metric("Overall Depression Rate", f"{STATS['depression_rate']}%")
     st.markdown("---")
     st.caption(
         "**Dataset:** Student Depression Dataset  \n"
-        "[Kaggle →](https://www.kaggle.com/datasets/hopesb/student-depression-dataset)  \n"
+        "[Kaggle dataset](https://www.kaggle.com/datasets/hopesb/student-depression-dataset)  \n"
         "N = 27,901 anonymised student records"
     )
     st.markdown("---")
@@ -871,34 +1461,6 @@ with st.sidebar:
         "**Project:** IMLD Visual Computing Team Project SS 2026  \n"
         "TU Dresden · Prof. Dachselt"
     )
-
-# # ─────────────────────────────────────────────
-# #  Header
-# # ─────────────────────────────────────────────
-# st.title("🧠 AI-Powered Data Storytelling")
-# st.caption(
-#     "Comparing human-written, LLM-generated, and agentic-enhanced stories "
-#     "about student depression — IMLD Team Project SS 2026"
-# )
-# st.markdown("---")
-# ─────────────────────────────────────────────
-#  Header / Project introduction
-# ─────────────────────────────────────────────
-# st.markdown(
-#     """
-#     <div class="hero-section">
-#     <div class="hero-label">TU DRESDEN · IMLD TEAM PROJECT SS 2026</div>
-#     <h1>AI-Powered Data Storytelling</h1>
-#     <p>
-#     Explore how the same student-depression dataset can be transformed
-#     into human-written, LLM-generated, and agentic data stories.
-#     </p>
-#     </div>
-#         """,
-#         unsafe_allow_html=True,
-# )
-
-# intro
 
 @st.dialog("About this project")
 def show_intro():
@@ -922,15 +1484,6 @@ def show_intro():
         st.rerun()
 
 
-# # ─────────────────────────────────────────────
-# #  Data visualisation  (interactive – click a bar to highlight stories)
-# # ─────────────────────────────────────────────
-# st.subheader("📊 Dataset Overview")
-# st.caption(
-#     "💡 **Click any bar** to highlight the sentences about that topic across all "
-#     "three stories below. Click again or use *Clear* to remove the highlight."
-# )
-
 # # Track the currently selected topic and a per-chart selection signature so we
 # # can detect which chart the user interacted with most recently.
 for key, default in [("selected_topic", None),
@@ -945,19 +1498,6 @@ chart_specs = [
     ("financial_stress",  make_financial_fig),
     ("sleep",             make_sleep_fig),
 ]
-
-# cc = st.columns(3, gap="small")
-# events = {}
-# for (topic, builder), col in zip(chart_specs, cc):
-#     with col:
-#         fig = builder(STATS, st.session_state.selected_topic)
-#         events[topic] = st.plotly_chart(
-#             fig,
-#             use_container_width=True,
-#             key=f"chart_{topic}",
-#             on_select="rerun",
-#             selection_mode="points",
-#         )
 
 def _selection_sig(ev):
     try:
@@ -990,69 +1530,145 @@ for key, default in [
 if "intro_seen" not in st.session_state:
     st.session_state.intro_seen = False
 
-if not st.session_state.intro_seen:
-    show_intro()
-
-
-# ─────────────────────────────────────────────
-#  Contextual guidance (change #6) – collapsed by default
-# ─────────────────────────────────────────────
-
-# ─────────────────────────────────────────────
-
-# ─────────────────────────────────────────────
-#  layout
-#  top bar
-col1, col2, col3 = st.columns([7, 1, 1])
-with col1:
-    with st.expander("ℹ️ How to read this — what am I comparing?"):
-        st.markdown(
-        "- **✍️ Human-Written** — a story crafted by the team (\"Zero Battery\"). "
-        "It uses narrative craft and a named protagonist. Look at how it builds empathy.\n"
-        "- **🤖 LLM-Generated** — written by Gemini *strictly* from the dataset numbers. "
-        "Compare its accuracy and structure against the human version.\n"
-        "- **🎭 Agentic-Enhanced** — the LLM story rewritten by an agent in a chosen emotional "
-        "tone while keeping every statistic. Look at *what the tone changed* (and the tone-shift gauge).\n"
-        "\n"
-        "**📖 Flesch readability** measures how easy the text is to read (0–100, higher = easier): "
-        "90–100 ≈ very easy (5th grade) · 60–70 ≈ standard newspaper level · below 30 ≈ very hard (academic).\n\n"
-        "**💬 Sentiment** is the VADER *compound* score from −1 (very negative) to +1 (very positive); "
-        "near 0 is emotionally neutral. The **tone arc** below each story shows this sentence by sentence."
+with st.container():
+    st.markdown("<div class='cover-section-marker'></div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <section class="cover-section">
+            <div class="cover-copy-panel">
+                <header class="project-header">
+                    <h1 class="project-title">
+                        <span class="project-title-line">AI-Powered</span>
+                        <span class="project-title-line">Data Storytelling</span>
+                    </h1>
+                    <p class="project-subtitle">Comparing human-written, LLM-generated, and agentic narratives from student depression data</p>
+                </header>
+                <footer class="cover-footer">
+                    <div class="cover-labels">
+                        <div class="cover-label" style="--label-accent:#9BB29E;"><span class="cover-label-number">01</span><span class="cover-label-text">Human-Written</span></div>
+                        <div class="cover-label" style="--label-accent:#5B5E9D;"><span class="cover-label-number">02</span><span class="cover-label-text">Gemini-Generated</span></div>
+                        <div class="cover-label" style="--label-accent:#DA6B51;"><span class="cover-label-number">03</span><span class="cover-label-text">Agentic-Enhanced</span></div>
+                    </div>
+                </footer>
+            </div>
+            <div class="cover-geometry" aria-hidden="true">
+                <span class="poster-module poster-module-one"></span>
+                <span class="poster-module poster-module-two"></span>
+                <span class="poster-module poster-module-three"></span>
+            </div>
+            <div class="cover-scroll-cue"><span class="cover-scroll-line" aria-hidden="true"></span>Scroll to explore</div>
+        </section>
+        """,
+        unsafe_allow_html=True,
     )
 
-with col2:
-    if st.button("About"):
-        show_intro()
+with st.container():
+    st.markdown("<div class='compare-section-marker'></div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <section class="narrative-section compare-section">
+            <div class="chapter-kicker">02 — How to Compare</div>
+            <h2 class="chapter-title">How to Compare</h2>
+            <p class="chapter-lead">Three approaches. One dataset. Different ways of turning evidence into narrative.</p>
+            <div class="method-grid">
+                <article class="method-card" style="--method-accent:#9BB29E;">
+                    <div class="method-number">01 — HUMAN-WRITTEN</div>
+                    <div class="method-title">Human-Written</div>
+                    <div class="method-copy">Crafted by the team around a named protagonist. Focus on empathy and narrative structure.</div>
+                </article>
+                <article class="method-card" style="--method-accent:#5B5E9D;">
+                    <div class="method-number">02 — GEMINI-GENERATED</div>
+                    <div class="method-title">Gemini-Generated</div>
+                    <div class="method-copy">Generated directly from the selected dataset. Focus on accuracy, coverage, and structure.</div>
+                </article>
+                <article class="method-card" style="--method-accent:#DA6B51;">
+                    <div class="method-number">03 — AGENTIC-ENHANCED</div>
+                    <div class="method-title">Agentic-Enhanced</div>
+                    <div class="method-copy">Rewrites the Gemini story in a selected emotional tone while preserving its factual claims. Focus on what the tone changes.</div>
+                </article>
+            </div>
+            <div class="measure-grid">
+                <article class="measure-card" style="--measure-accent:#5B5E9D;">
+                    <div class="measure-heading"><span>READABILITY</span><span class="measure-number">01</span></div>
+                    <div class="measure-value">0–100</div>
+                    <div class="measure-name">Flesch Reading Ease</div>
+                    <div class="measure-copy">Higher scores mean easier reading.</div>
+                    <div class="metric-scale readability-scale">
+                        <div class="scale-labels"><span class="negative">Difficult</span><span class="neutral">Standard</span><span class="positive">Easier</span></div>
+                        <div class="scale-track"><span></span><span></span><span></span></div>
+                        <div class="scale-values"><span>0</span><span>40&nbsp;&nbsp;&nbsp;60</span><span>100</span></div>
+                    </div>
+                </article>
+                <article class="measure-card" style="--measure-accent:#DA6B51;">
+                    <div class="measure-heading"><span>SENTIMENT</span><span class="measure-number">02</span></div>
+                    <div class="measure-value">−1&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;+1</div>
+                    <div class="measure-name">VADER Compound Score</div>
+                    <div class="measure-copy">Shows the emotional direction of each story.</div>
+                    <div class="metric-scale sentiment-scale">
+                        <div class="scale-labels"><span class="negative">Negative</span><span class="neutral">Neutral</span><span class="positive">Positive</span></div>
+                        <div class="scale-track"><span></span><span></span><i class="scale-midpoint"></i></div>
+                        <div class="scale-values"><span>−1</span><span>0</span><span>+1</span></div>
+                    </div>
+                </article>
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
 
-with col3:
-    if st.button("🔄 Reset All", use_container_width=True):
-        st.session_state.llm_story       = ""
-        st.session_state.enhanced_story  = ""
-        st.session_state.show_diff       = False
-        st.rerun()
+with st.container():
+    st.markdown("<div class='workspace-section-marker'></div>", unsafe_allow_html=True)
+    workspace_title_col, workspace_action_col = st.columns(
+        [7, 1.25],
+        vertical_alignment="bottom",
+    )
+    with workspace_title_col:
+        st.markdown(
+            """
+            <section class="workspace-heading">
+                <div class="chapter-kicker">03 — Explore and Compare</div>
+                <h2 class="chapter-title">Explore and Compare</h2>
+                <p class="chapter-lead">Select a subgroup, inspect the data, and compare how each approach constructs its story.</p>
+            </section>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with workspace_action_col:
+        if st.button("Reset All", use_container_width=True):
+            st.session_state.llm_story       = ""
+            st.session_state.enhanced_story  = ""
+            st.session_state.show_diff       = False
+            st.rerun()
 
 
-#  main page: 2 different columns for human analysis and normal Gemini analysis, addition is a visulization.
-left_col, center_col, right_col = st.columns([1, 2, 1], gap="large")
+# Symmetric story comparison with a wider analytical centre.
+left_col, center_col, right_col = st.columns([1.15, 1.7, 1.15], gap="large")
 
 with left_col:
-    st.markdown("<div class='section-label'>✍️ Human-Written Story</div>", unsafe_allow_html=True)
-    st.caption(f"Showing: **{HUMAN_VARIANT}**"+(
-        ""
+    st.markdown("<div class='story-heading human'>Human-Written Story</div>", unsafe_allow_html=True)
+    human_variant_note = (
+        HUMAN_VARIANT
         if HUMAN_VARIANT == "default story"
-        else " · adapts to the active filter"))
+        else f"{HUMAN_VARIANT} · adapts to the active filter"
+    )
+    st.markdown(
+        f"<div class='story-meta'>Showing: <b>{human_variant_note}</b></div>",
+        unsafe_allow_html=True,
+    )
     
     with st.container(border=True):
         st.markdown(
-            "<div class='story-card-marker'></div>",
+            "<div class='human-card-marker'></div>",
             unsafe_allow_html=True
         )
-        st.markdown(
-        render_story_html(
+        human_story_html = render_story_html(
             HUMAN_STORY,
-            st.session_state.selected_topic
-        ),
-        unsafe_allow_html=True,
+            st.session_state.selected_topic,
+        )
+        st.markdown(
+            f"<div class='story-scroll'>{human_story_html}</div>",
+            unsafe_allow_html=True,
         )
 
     rating_human = st.feedback(
@@ -1062,20 +1678,13 @@ with left_col:
 
     if st.session_state.rating_human is not None:
         st.caption(
-            f"You rated this {st.session_state.rating_human + 1}/5 ⭐"
+            f"You rated this {st.session_state.rating_human + 1}/5"
         )
 
 with center_col:
-    title_col, swich_col, clear_col = st.columns(
-        [2, 2, 1],
-        vertical_alignment="center"
-        )
-
-    with title_col:
-        st.markdown("### 📊 Dataset Overview")
-
-
-    with swich_col:           
+    st.markdown("<div class='section-heading'>Dataset Overview</div>", unsafe_allow_html=True)
+    with st.container():
+        st.markdown("<div class='dataset-controls-marker'></div>", unsafe_allow_html=True)
         topic_view = st.segmented_control(
             "Dataset view",
             ["Academic", "Financial", "Sleep"],
@@ -1085,11 +1694,10 @@ with center_col:
             label_visibility="collapsed",
         )
 
-    with clear_col:
-        if st.session_state.selected_topic:
-            if st.button("✖ Clear Highlight", key="clear_highlight"):
-                st.session_state.selected_topic = None
-                st.rerun()
+    if st.session_state.selected_topic:
+        if st.button("Clear Highlight", key="clear_highlight"):
+            st.session_state.selected_topic = None
+            st.rerun()
 
     view_for_chart = topic_view or "Academic"
 
@@ -1119,33 +1727,31 @@ with center_col:
         fig,
         use_container_width=True,
         key=f"chart_{current_topic}",
+        theme="streamlit",
     )
 
     # ─────────────────────────────────────────────
     #  Agentic emotional enhancement
     # ─────────────────────────────────────────────
-    title_col, clean_col, page_col = st.columns(
-        [3, 3, 3],
-        vertical_alignment="center")
-
-    with title_col:
-        st.markdown("🎭 Agentic Emotional Enhancement")
-
-    with clean_col:
-        if st.session_state.enhanced_story:
-            if st.button("🗑️ Clear Enhancement"):
-                st.session_state.enhanced_story = ""
-                st.session_state.show_diff = False
-                st.rerun()
-
-    with page_col:
+    st.markdown(
+        "<div class='section-heading'>Agentic Emotional Enhancement</div>",
+        unsafe_allow_html=True,
+    )
+    with st.container():
+        st.markdown("<div class='agent-controls-marker'></div>", unsafe_allow_html=True)
         agent_page = st.segmented_control(
-        "Agentic page",
-        ["Setup", "Story", "Analysis"],
-        default="Setup",
-        key="agent_page",
-        label_visibility="collapsed",
+            "Agentic page",
+            ["Setup", "Story", "Analysis"],
+            default="Setup",
+            key="agent_page",
+            label_visibility="collapsed",
         )
+
+    if st.session_state.enhanced_story:
+        if st.button("Clear Enhancement"):
+            st.session_state.enhanced_story = ""
+            st.session_state.show_diff = False
+            st.rerun()
 
     if agent_page == "Setup":
         st.caption(
@@ -1164,7 +1770,7 @@ with center_col:
         with ecol2:
             st.write("")  # vertical spacer
             if st.session_state.llm_story:
-                if st.button("✨ Enhance Story", type="primary", use_container_width=True):
+                if st.button("Enhance Story", type="primary", use_container_width=True):
                     with st.spinner(f"Agent rewriting as '{emotion}'…"):
                         st.session_state.enhanced_story = enhance_story(
                             st.session_state.llm_story, data_summary, emotion
@@ -1178,14 +1784,6 @@ with center_col:
                     "<div class='story-card-marker'></div>",
                     unsafe_allow_html=True
                 )
-            # st.markdown(
-            #     render_story_html(
-            #         st.session_state.enhanced_story,
-            #         st.session_state.selected_topic
-            #     ),
-            #     unsafe_allow_html=True,
-            # )
-
                 strory_html = render_story_html(
                     st.session_state.enhanced_story,
                     st.session_state.selected_topic
@@ -1204,7 +1802,7 @@ with center_col:
 
             rating_enhanced = st.feedback("stars", key="rating_enhanced")
             if st.session_state.rating_enhanced is not None:
-                st.caption(f"You rated this {st.session_state.rating_enhanced + 1}/5 ⭐")
+                st.caption(f"You rated this {st.session_state.rating_enhanced + 1}/5")
 
 
 
@@ -1230,16 +1828,21 @@ with center_col:
                             st.session_state.enhanced_story,
                         )
 
-                        st.markdown("#### 🔍 Word-level diff")
+                        st.markdown("#### Word-level diff")
                         st.markdown(diff_html, unsafe_allow_html=True)                
 
 with right_col:
     st.markdown(
-        "### 🤖 Gemini Story",
+        "<div class='story-heading gemini'>Gemini-Generated Story</div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<div class='story-meta'>Generated from the active filters</div>",
+        unsafe_allow_html=True,
     )
     with st.container(border=True):
         st.markdown(
-            "<div class='story-card-marker'></div>",
+            "<div class='gemini-card-marker'></div>",
             unsafe_allow_html=True
         )
 
@@ -1250,25 +1853,14 @@ with right_col:
                 )
 
                 st.markdown(
-                    f"""
-                    <div style="
-                    max-height: 760px;
-                    overflow-y: auto;
-                    padding-right: 10px;
-                    ">
-                    {llm_story_html}
-                    </div>
-                    """,
+                    f"<div class='story-scroll'>{llm_story_html}</div>",
                     unsafe_allow_html=True,
             )
         else:
-            st.info("Generate a Gemini story below.")
-        if st.button("⚡ Generate LLM Story", type="primary", use_container_width=True):
-                with st.spinner("Gemini is writing a story…"):
-                    st.session_state.llm_story    = generate_llm_story(data_summary)
-                    st.session_state.enhanced_story = ""
-                    st.session_state.show_diff     = False
-                st.rerun()
+            st.markdown(
+                "<div class='story-empty'>Generate a Gemini story to compare it with the human-written narrative.</div>",
+                unsafe_allow_html=True,
+            )
 
     if st.session_state.llm_story:
 
@@ -1279,23 +1871,30 @@ with right_col:
 
         if st.session_state.rating_llm is not None:
             st.caption(
-                f"You rated this {st.session_state.rating_llm + 1}/5 ⭐"
+                f"You rated this {st.session_state.rating_llm + 1}/5"
             )
+
+    if st.button("Generate Gemini Story", type="primary", use_container_width=True):
+        with st.spinner("Gemini is writing a story…"):
+            st.session_state.llm_story = generate_llm_story(data_summary)
+            st.session_state.enhanced_story = ""
+            st.session_state.show_diff = False
+        st.rerun()
 
 
 # ─────────────────────────────────────────────
 #  Comparison "hero" cards  (change #3) – shown once a story exists
 # ─────────────────────────────────────────────
 if st.session_state.llm_story:
-    st.subheader("📊 Story Comparison at a Glance")
+    st.subheader("Story Comparison at a Glance")
 
     versions = [
-        ("✍️ Human-Written", HUMAN_STORY, "#fff3b0"),
-        ("🤖 LLM-Generated", st.session_state.llm_story, "#ce93d8"),
+        ("Human-Written", HUMAN_STORY, "#9BB29E"),
+        ("Gemini-Generated", st.session_state.llm_story, "#5B5E9D"),
     ]
     if st.session_state.enhanced_story:
         tone = st.session_state.get("emotion_select", "enhanced")
-        versions.append((f"🎭 Enhanced · {tone}", st.session_state.enhanced_story, "#80cbc4"))
+        versions.append((f"Agentic Enhanced · {tone}", st.session_state.enhanced_story, "#DA6B51"))
 
     ccols = st.columns(3, gap="medium")
     for (label, story, accent), ccol in zip(versions, ccols):
@@ -1395,13 +1994,24 @@ if st.session_state.llm_story:
 #  Download report
 # ─────────────────────────────────────────────
 if st.session_state.llm_story:
-    st.subheader("📥 Download Report")
+    st.subheader("Download Report")
 
-    clo1, clo2 = st.columns([3, 7])
+    if st.session_state.get("report_choice") == "All(Story Comparison)":
+        st.session_state.report_choice = "Full Comparison"
 
-    with clo1:
+    report_choice_col, report_action_col = st.columns(
+        [5.5, 1.5],
+        vertical_alignment="center",
+    )
+
+    with report_choice_col:
+        st.markdown("<div class='report-controls-marker'></div>", unsafe_allow_html=True)
         report_choice = st.segmented_control(
-            "Include in report", ["All(Story Comparison)", "Human", "Gemini", "Agentic"], default=None, key="report_choice", label_visibility="collapsed"
+            "Include in report",
+            ["Full Comparison", "Human", "Gemini", "Agentic"],
+            default=None,
+            key="report_choice",
+            label_visibility="collapsed",
         )
 
         # lines = [
@@ -1549,16 +2159,28 @@ if st.session_state.llm_story:
         #     elements.append(table)
         #     doc.build(elements)
 
-    with clo2:
-        if report_choice != None:
-            pdf_data = build_pdf(report_choice)
+    with report_action_col:
+        if report_choice is not None:
+            pdf_report_choice = (
+                "All(Story Comparison)"
+                if report_choice == "Full Comparison"
+                else report_choice
+            )
+            pdf_data = build_pdf(pdf_report_choice)
 
             st.download_button(
-                "⬇️ Download PDF",
+                "Download PDF",
                 data=pdf_data,
                 file_name="story_report.pdf",
                 mime="application/pdf",
+                use_container_width=True,
             )
+
+st.markdown("---")
+about_col, _ = st.columns([1, 7])
+with about_col:
+    if st.button("About", use_container_width=True):
+        show_intro()
 
 # # ─────────────────────────────────────────────
 # #  Download report
