@@ -113,8 +113,7 @@ This file is in `.gitignore` and is never committed.
 
 ```bash
 # Standard Python
-streamlit run app.py #(original)
-streamlit run app_redesign.py #(updated)
+streamlit run app.py
 
 # Anaconda
 C:\Users\vikash\anaconda3\python.exe -m streamlit run app.py
