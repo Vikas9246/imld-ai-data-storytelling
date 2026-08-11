@@ -441,7 +441,7 @@ st.markdown(
     .workspace-heading .chapter-lead { margin-bottom: 0.5rem; }
 
     .section-heading,
-    .story-heading {
+    .workspace-column-title {
         color: var(--text-color, currentColor);
         font-weight: 720;
         line-height: 1.2;
@@ -452,20 +452,31 @@ st.markdown(
         font-size: clamp(1.08rem, 1.6vw, 1.35rem);
     }
 
-    .story-heading {
-        min-height: 2.8rem;
+    .workspace-column-header {
+        min-height: 5.65rem;
+        display: grid;
+        grid-template-rows: 3rem 2.65rem;
+        margin: 0 0 0.45rem;
+    }
+
+    .workspace-column-title {
+        min-height: 3rem;
         margin: 0;
         display: flex;
         align-items: center;
+        padding-top: 0.5rem;
+        border-top: 3px solid var(--column-accent, var(--kyoto-dusk));
         font-size: clamp(1.05rem, 1.35vw, 1.25rem);
     }
 
-    .story-heading.human { border-top: 3px solid var(--matcha-cream); }
-    .story-heading.gemini { border-top: 3px solid var(--kyoto-dusk); }
+    .workspace-column-header.human { --column-accent: var(--matcha-cream); }
+    .workspace-column-header.dataset { --column-accent: var(--kyoto-dusk); }
+    .workspace-column-header.gemini { --column-accent: var(--kyoto-dusk); }
 
-    .story-meta {
-        min-height: 2.7rem;
-        margin: 0.25rem 0 0.45rem;
+    .workspace-column-meta {
+        min-height: 2.65rem;
+        margin: 0;
+        padding-top: 0.3rem;
         color: color-mix(in srgb, currentColor 68%, var(--matcha-cream));
         font-size: 0.82rem;
         line-height: 1.4;
@@ -499,7 +510,7 @@ st.markdown(
     }
 
     .story-scroll {
-        height: clamp(31rem, 53vh, 47.5rem);
+        height: clamp(36rem, 66vh, 56rem);
         overflow-y: auto;
         padding-right: 0.55rem;
         scrollbar-gutter: stable;
@@ -514,7 +525,7 @@ st.markdown(
     .story-box p:last-child { margin-bottom: 0; }
 
     .story-empty {
-        height: clamp(31rem, 53vh, 47.5rem);
+        height: clamp(36rem, 66vh, 56rem);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -561,66 +572,91 @@ st.markdown(
         font-size: 0.85rem;
     }
 
-    /* Scope nowrap rules to the compact navigation and report controls. */
-    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stButtonGroup"] button,
-    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stButtonGroup"] button,
-    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stButtonGroup"] button {
-        min-width: 0;
-        white-space: nowrap;
+    /* These two navigation groups are centered independently of header actions. */
+    [data-testid="stElementContainer"].st-key-topic_view,
+    [data-testid="stElementContainer"].st-key-agent_page {
+        width: 100% !important;
+        margin-block: 0.15rem 0.75rem;
     }
 
-    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stButtonGroup"],
-    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stButtonGroup"],
-    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stButtonGroup"] {
+    .st-key-topic_view [data-testid="stButtonGroup"],
+    .st-key-agent_page [data-testid="stButtonGroup"] {
         display: flex;
         flex-wrap: nowrap;
-        width: 100%;
+        width: min(100%, 25rem) !important;
+        margin-inline: auto;
         background: transparent !important;
     }
 
-    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]),
-    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]),
-    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]) {
-        width: 100% !important;
-    }
-
-    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stButtonGroup"] > div,
-    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stButtonGroup"] > div,
-    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stButtonGroup"] > div {
-        display: flex;
-        width: 100% !important;
-        flex: 1 1 100% !important;
-    }
-
-    [data-testid="stButtonGroup"] > div:has(> button[data-variant="segmented_control"]) {
+    .st-key-topic_view [data-testid="stButtonGroup"] > div,
+    .st-key-agent_page [data-testid="stButtonGroup"] > div {
         display: flex;
         width: 100% !important;
         max-width: none !important;
         flex: 1 1 100% !important;
     }
 
-    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [data-testid="stButtonGroup"] button,
-    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [data-testid="stButtonGroup"] button,
-    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [data-testid="stButtonGroup"] button {
+    .st-key-topic_view [data-testid="stButtonGroup"] button[data-variant="segmented_control"],
+    .st-key-agent_page [data-testid="stButtonGroup"] button[data-variant="segmented_control"] {
         flex: 1 1 0;
+        min-width: 6.5rem;
+        padding-inline: 0.8rem;
+        white-space: nowrap;
+        text-overflow: clip;
         border-color: var(--control-border) !important;
         background: transparent !important;
         color: inherit !important;
     }
 
-    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [role="radio"][aria-checked="true"],
-    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [role="radio"][aria-checked="true"],
-    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [role="radio"][aria-checked="true"] {
+    .st-key-topic_view [role="radio"][aria-checked="true"],
+    .st-key-agent_page [role="radio"][aria-checked="true"] {
         border-color: var(--kyoto-dusk);
         background: var(--control-selected) !important;
         color: inherit !important;
     }
 
-    [data-testid="stVerticalBlock"]:has(.dataset-controls-marker) [role="radio"]:hover,
-    [data-testid="stVerticalBlock"]:has(.agent-controls-marker) [role="radio"]:hover,
-    [data-testid="stVerticalBlock"]:has(.report-controls-marker) [role="radio"]:hover {
+    .st-key-topic_view [role="radio"]:hover,
+    .st-key-agent_page [role="radio"]:hover {
         border-color: color-mix(in srgb, var(--kyoto-dusk) 68%, transparent);
         background: var(--control-hover) !important;
+    }
+
+    /* Preserve the existing full-width report selector independently. */
+    .st-key-report_choice [data-testid="stButtonGroup"],
+    .st-key-report_choice [data-testid="stButtonGroup"] > div {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100% !important;
+        max-width: none !important;
+        flex: 1 1 100% !important;
+        background: transparent !important;
+    }
+
+    .st-key-report_choice [data-testid="stButtonGroup"] button[data-variant="segmented_control"] {
+        flex: 1 1 0;
+        min-width: 0;
+        white-space: nowrap;
+        border-color: var(--control-border) !important;
+        background: transparent !important;
+        color: inherit !important;
+    }
+
+    .st-key-report_choice [role="radio"][aria-checked="true"] {
+        border-color: var(--kyoto-dusk);
+        background: var(--control-selected) !important;
+        color: inherit !important;
+    }
+
+    .st-key-report_choice [role="radio"]:hover {
+        border-color: color-mix(in srgb, var(--kyoto-dusk) 68%, transparent);
+        background: var(--control-hover) !important;
+    }
+
+    .agentic-story-scroll {
+        max-height: clamp(24rem, 48vh, 32rem);
+        overflow-y: auto;
+        padding-right: 0.55rem;
+        scrollbar-gutter: stable;
     }
 
     div[data-testid="stButton"] button[kind="secondary"],
@@ -690,8 +726,7 @@ st.markdown(
         .method-grid { grid-template-columns: 1fr; }
         .measure-grid { grid-template-columns: 1fr; }
         .method-card { min-height: auto; }
-        .story-heading { min-height: 3.2rem; }
-        .story-scroll, .story-empty { height: 34rem; }
+        .story-scroll, .story-empty { height: 36rem; }
     }
 
     @media (max-width: 640px) {
@@ -1646,14 +1681,18 @@ with st.container():
 left_col, center_col, right_col = st.columns([1.15, 1.7, 1.15], gap="large")
 
 with left_col:
-    st.markdown("<div class='story-heading human'>Human-Written Story</div>", unsafe_allow_html=True)
     human_variant_note = (
         HUMAN_VARIANT
         if HUMAN_VARIANT == "default story"
         else f"{HUMAN_VARIANT} · adapts to the active filter"
     )
     st.markdown(
-        f"<div class='story-meta'>Showing: <b>{human_variant_note}</b></div>",
+        f"""
+        <div class="workspace-column-header human">
+            <div class="workspace-column-title">Human-Written Story</div>
+            <div class="workspace-column-meta">Showing: <b>{human_variant_note}</b></div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
     
@@ -1682,7 +1721,16 @@ with left_col:
         )
 
 with center_col:
-    st.markdown("<div class='section-heading'>Dataset Overview</div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class="workspace-column-header dataset">
+            <div class="workspace-column-title">Dataset Overview</div>
+            <div class="workspace-column-meta" aria-hidden="true">&nbsp;</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     with st.container():
         st.markdown("<div class='dataset-controls-marker'></div>", unsafe_allow_html=True)
         topic_view = st.segmented_control(
@@ -1695,9 +1743,11 @@ with center_col:
         )
 
     if st.session_state.selected_topic:
-        if st.button("Clear Highlight", key="clear_highlight"):
-            st.session_state.selected_topic = None
-            st.rerun()
+        clear_left, clear_center, clear_right = st.columns([1.2, 1, 1.2])
+        with clear_center:
+            if st.button("Clear Highlight", key="clear_highlight", use_container_width=True):
+                st.session_state.selected_topic = None
+                st.rerun()
 
     view_for_chart = topic_view or "Academic"
 
@@ -1733,10 +1783,23 @@ with center_col:
     # ─────────────────────────────────────────────
     #  Agentic emotional enhancement
     # ─────────────────────────────────────────────
-    st.markdown(
-        "<div class='section-heading'>Agentic Emotional Enhancement</div>",
-        unsafe_allow_html=True,
+    agent_title_col, agent_action_col = st.columns(
+        [4, 1.55],
+        gap="small",
+        vertical_alignment="top",
     )
+    with agent_title_col:
+        st.markdown(
+            "<div class='section-heading'>Agentic Emotional Enhancement</div>",
+            unsafe_allow_html=True,
+        )
+    with agent_action_col:
+        if st.session_state.enhanced_story:
+            if st.button("Clear Enhancement", use_container_width=True):
+                st.session_state.enhanced_story = ""
+                st.session_state.show_diff = False
+                st.rerun()
+
     with st.container():
         st.markdown("<div class='agent-controls-marker'></div>", unsafe_allow_html=True)
         agent_page = st.segmented_control(
@@ -1746,12 +1809,6 @@ with center_col:
             key="agent_page",
             label_visibility="collapsed",
         )
-
-    if st.session_state.enhanced_story:
-        if st.button("Clear Enhancement"):
-            st.session_state.enhanced_story = ""
-            st.session_state.show_diff = False
-            st.rerun()
 
     if agent_page == "Setup":
         st.caption(
@@ -1789,11 +1846,7 @@ with center_col:
                     st.session_state.selected_topic
                 )
                 st.markdown(
-                    f"""<div style="
-                    max-height: 423px;
-                    overflow-y: auto;
-                    padding-right: 10px;
-                    ">
+                    f"""<div class="agentic-story-scroll">
                     {strory_html}
                     </div>
                     """,
@@ -1833,11 +1886,12 @@ with center_col:
 
 with right_col:
     st.markdown(
-        "<div class='story-heading gemini'>Gemini-Generated Story</div>",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        "<div class='story-meta'>Generated from the active filters</div>",
+        """
+        <div class="workspace-column-header gemini">
+            <div class="workspace-column-title">Gemini-Generated Story</div>
+            <div class="workspace-column-meta">Generated from the active filters</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
     with st.container(border=True):
