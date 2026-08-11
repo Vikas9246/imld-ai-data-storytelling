@@ -720,7 +720,7 @@ TOPIC_KEYWORDS = {
 }
 # Light tints (chart-matched) used as the highlight background; dark text on top.
 TOPIC_HL_COLORS = {
-    "academic_pressure": "#fff3b0",   # amber/yellow
+    "academic_pressure": "#6c8ebf",   # amber/yellow
     "financial_stress":  "#ffd1d1",   # red tint
     "sleep":             "#cdeccd",   # green tint
 }
