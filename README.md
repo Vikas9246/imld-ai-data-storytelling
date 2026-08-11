@@ -39,7 +39,7 @@ The interface also evaluates all three versions automatically using readability,
 - Three primary findings from our data analysis:
   - Academic pressure: depression rate rises from **19.4%** (level 1) → **86.1%** (level 5)
   - Financial stress: depression rate rises from **31.9%** (level 1) → **81.3%** (level 5)
-  - Sleep: students sleeping fewer than 5 hours show **64.5%** depression rate; 8+ hours drops to **28.5%**
+  - Sleep: students sleeping fewer than 5 hours show **64.5%** depression rate; 8+ hours drops to **50.9%**
 
 Download the CSV from Kaggle and save it as `data/data.csv` before running.
 
