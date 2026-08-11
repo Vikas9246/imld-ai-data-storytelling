@@ -5,3 +5,4 @@ numpy>=1.26.0
 plotly>=5.9.0
 textstat>=0.7.3
 vaderSentiment>=3.3.2
+reportlab
