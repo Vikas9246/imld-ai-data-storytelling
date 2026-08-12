@@ -23,6 +23,11 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 from reportlab.lib import colors
 
+# Minimum VADER compound delta worth labelling as a direction: on long, uniformly
+# single-valence text the compound score saturates near ±1, so sub-0.05 moves are
+# ceiling noise rather than a real tone shift.
+DELTA_THRESHOLD = 0.05
+
 # ─────────────────────────────────────────────
 #  Page config
 # ─────────────────────────────────────────────
@@ -1094,9 +1099,16 @@ def render_tone_shift(llm_text, enhanced_text, tone_name):
     pos = lambda c: (c + 1) / 2 * 100
     p1, p2 = pos(llm_c), pos(enh_c)
     left, right = sorted([p1, p2])
-    line_color = "#66bb6a" if enh_c > llm_c else ("#ef5350" if enh_c < llm_c else "#9e9e9e")
-    direction = ("warmer / more positive" if enh_c > llm_c
-                 else ("darker / more negative" if enh_c < llm_c else "unchanged"))
+    delta = enh_c - llm_c
+    if abs(delta) < DELTA_THRESHOLD:
+        line_color = "#9e9e9e"
+        direction  = "no measurable shift at this scale"
+    elif delta > 0:
+        line_color = "#66bb6a"
+        direction  = "warmer / more positive"
+    else:
+        line_color = "#ef5350"
+        direction  = "darker / more negative"
     block = f"""
     <div style='margin:0.4rem 0 0.9rem 0;'>
       <div style='font-size:0.86rem;color:color-mix(in srgb,currentColor 72%,#9BB29E);margin-bottom:0.55rem;'>
