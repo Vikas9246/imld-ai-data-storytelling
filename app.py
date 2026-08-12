@@ -750,12 +750,12 @@ st.markdown(
 # in every story that mentions that topic (keyword match).
 TOPIC_KEYWORDS = {
     "academic_pressure": ["academic", "pressure", "study", "grade", "cgpa"],
-    "financial_stress":  ["financial", "stress", "money", "rent", "fee"],
-    "sleep":             ["sleep", "hours", "rest", "tired", "battery"],
+    "financial_stress":  ["financial", "stress", "money", "rent", "fees"],
+    "sleep":             ["sleep", "hours", "rest", "tired"],
 }
 # Light tints (chart-matched) used as the highlight background; dark text on top.
 TOPIC_HL_COLORS = {
-    "academic_pressure": "#6c8ebf",   # amber/yellow
+    "academic_pressure": "#E8E3C3",   # pale sand/cream
     "financial_stress":  "#ffd1d1",   # red tint
     "sleep":             "#cdeccd",   # green tint
 }
@@ -771,9 +771,17 @@ def split_sentences(text):
     return [p for p in parts if p.strip()]
 
 def sentence_matches_topic(sentence, topic):
+    """True if the sentence mentions any keyword for this topic.
+
+    Matches on a leading word boundary so that suffixed forms (e.g. "pressures",
+    "grades") still match, while substrings inside unrelated words (e.g. "fee"
+    in "feels", "rent" in "parent") do not.
+    """
     kws = TOPIC_KEYWORDS.get(topic, [])
-    low = sentence.lower()
-    return any(kw in low for kw in kws)
+    if not kws:
+        return False
+    pattern = r"\b(" + "|".join(re.escape(k) for k in kws) + r")"
+    return re.search(pattern, sentence.lower()) is not None
 
 def _md_inline_to_html(s):
     """Minimal markdown → HTML for inline bold so stories render properly inside a div."""
@@ -995,7 +1003,7 @@ def factual_check(story, data_summary):
     story_nums   = extract_numbers(story)
     allowed_nums = extract_numbers(data_summary)
     # Always allow common non-data numbers: years (2019-2030), 100, 1000 etc.
-    ignore = {"100", "1000", "5", "8", "28", "23", "4", "1", "2", "3", "0"}
+    ignore = {"100", "1000", "000", "5", "8", "28", "23", "4", "1", "2", "3", "0"}
     extra = story_nums - allowed_nums - ignore
     return len(extra) == 0, extra
 
@@ -1188,7 +1196,7 @@ def build_pdf(report_choice):
     )
 
     metrics_text_agentic = (
-        f"Tone: {st.session_state.get('emotion_select', 'N/A')}<br/>"
+        f"Tone: {st.session_state.get('enhanced_tone') or 'N/A'}<br/>"
         f"Readability (Flesch): {readability_score(st.session_state.enhanced_story)}<br/>"
         f"Sentiment: {sentiment_score(st.session_state.enhanced_story)}<br/>"
         f"Rating: {(st.session_state.rating_enhanced + 1) if st.session_state.rating_enhanced is not None else 'N/A'}/5<br/>"
@@ -1297,7 +1305,7 @@ def build_pdf(report_choice):
 # ─────────────────────────────────────────────
 def generate_llm_story(summary):
     response = client.models.generate_content(
-        model="gemini-3.5-flash",
+        model="gemini-2.5-flash",
         contents=(
             f"Dataset summary:\n{summary}\n\n"
             "Write a data story of about 180–220 words about student depression based strictly on the numbers above. "
@@ -1314,7 +1322,8 @@ def generate_llm_story(summary):
             )
         ),
     )
-    return response.text.strip()
+    # response.text is None when the candidate is empty or blocked by a safety filter.
+    return (response.text or "").strip()
 
 
 EMOTION_MAP = {
@@ -1339,7 +1348,7 @@ EMOTION_MAP = {
 def enhance_story(original_story, summary, emotion="empathetic"):
     instruction = EMOTION_MAP.get(emotion, EMOTION_MAP["empathetic"])
     response = client.models.generate_content(
-        model="gemini-3.5-flash",
+        model="gemini-2.5-flash",
         contents=(
             f"Original story:\n{original_story}\n\n"
             f"Dataset facts for reference:\n{summary}\n\n"
@@ -1356,7 +1365,8 @@ def enhance_story(original_story, summary, emotion="empathetic"):
             )
         ),
     )
-    return response.text.strip()
+    # response.text is None when the candidate is empty or blocked by a safety filter.
+    return (response.text or "").strip()
 
 # ─────────────────────────────────────────────
 #  Visualisations  (interactive Plotly – linked to story highlighting)
@@ -1370,7 +1380,6 @@ def _style_fig(fig, title, xtitle, selected):
         font=dict(size=11),
         margin=dict(l=10, r=10, t=46, b=10),
         height=320,
-        clickmode="event+select",
         dragmode=False,
         showlegend=False,
         paper_bgcolor="rgba(0,0,0,0)",
@@ -1394,7 +1403,7 @@ def _bar_fig(labels, values, topic, base_color, title, xtitle, selected_topic):
             text=[f"{v}%" for v in values],
             textposition="outside",
             textfont=dict(size=11),
-            hovertemplate="%{x}<br>Depression: %{y}%<extra>click to highlight</extra>",
+            hovertemplate="%{x}<br>Depression: %{y}%<extra></extra>",
         )
     )
     ymax = min(100, (max(values) if values else 0) + 15)
@@ -1405,7 +1414,7 @@ def _bar_fig(labels, values, topic, base_color, title, xtitle, selected_topic):
 def make_academic_fig(stats, selected_topic=None):
     d = {k: v for k, v in sorted(stats["academic_pressure"].items())}
     return _bar_fig([str(int(k)) for k in d], list(d.values()), "academic_pressure",
-                    "#6c8ebf", "Academic Pressure vs Depression",
+                    "#E8E3C3", "Academic Pressure vs Depression",
                     "Academic Pressure Level (1=Low, 5=High)", selected_topic)
 
 def make_financial_fig(stats, selected_topic=None):
@@ -1554,6 +1563,10 @@ HUMAN_STORY, HUMAN_VARIANT = build_human_story(gender_filter, sleep_filter)
 for key, default in [
     ("llm_story", ""),
     ("enhanced_story", ""),
+    # Tone actually used for the current enhanced_story. Deliberately NOT the
+    # selectbox's widget key: that key is dropped whenever the Setup tab stops
+    # rendering, so the label would drift away from the story it describes.
+    ("enhanced_tone", ""),
     ("show_diff", False),
     ("rating_human", None),
     ("rating_llm", None),
@@ -1673,6 +1686,7 @@ with st.container():
         if st.button("Reset All", use_container_width=True):
             st.session_state.llm_story       = ""
             st.session_state.enhanced_story  = ""
+            st.session_state.enhanced_tone   = ""
             st.session_state.show_diff       = False
             st.rerun()
 
@@ -1797,6 +1811,7 @@ with center_col:
         if st.session_state.enhanced_story:
             if st.button("Clear Enhancement", use_container_width=True):
                 st.session_state.enhanced_story = ""
+                st.session_state.enhanced_tone = ""
                 st.session_state.show_diff = False
                 st.rerun()
 
@@ -1828,12 +1843,27 @@ with center_col:
             st.write("")  # vertical spacer
             if st.session_state.llm_story:
                 if st.button("Enhance Story", type="primary", use_container_width=True):
-                    with st.spinner(f"Agent rewriting as '{emotion}'…"):
-                        st.session_state.enhanced_story = enhance_story(
-                            st.session_state.llm_story, data_summary, emotion
-                        )
-                        st.session_state.show_diff = True
-                    st.rerun()
+                    # See note on the Generate handler: st.rerun() signals via
+                    # RerunException (a BaseException), so `except Exception` is safe.
+                    try:
+                        with st.spinner(f"Agent rewriting as '{emotion}'…"):
+                            text = enhance_story(
+                                st.session_state.llm_story, data_summary, emotion
+                            )
+                        if not text:
+                            st.error("The agent returned an empty response (this can "
+                                     "happen when a safety filter blocks the output). "
+                                     "Please try again.")
+                        else:
+                            st.session_state.enhanced_story = text
+                            # Pin the tone that produced this text, not whatever the
+                            # selectbox happens to show later.
+                            st.session_state.enhanced_tone = emotion
+                            st.session_state.show_diff = True
+                            st.rerun()
+                    except Exception as e:
+                        st.error(f"Tone rewrite failed: {type(e).__name__}. "
+                                 f"Check the API key, quota, and network connection.")
     elif agent_page == "Story":
         if st.session_state.enhanced_story:
             with st.container(border=True):
@@ -1871,7 +1901,7 @@ with center_col:
                 render_tone_shift(
                     st.session_state.llm_story,
                     st.session_state.enhanced_story,
-                    st.session_state.get("emotion_select", "enhanced"),
+                    st.session_state.get("enhanced_tone") or "enhanced",
                 )
 
                 # Diff view
@@ -1929,11 +1959,23 @@ with right_col:
             )
 
     if st.button("Generate Gemini Story", type="primary", use_container_width=True):
-        with st.spinner("Gemini is writing a story…"):
-            st.session_state.llm_story = generate_llm_story(data_summary)
-            st.session_state.enhanced_story = ""
-            st.session_state.show_diff = False
-        st.rerun()
+        # st.rerun() signals via RerunException, which subclasses BaseException and so
+        # is not caught by `except Exception` — safe to call inside the try.
+        try:
+            with st.spinner("Gemini is writing a story…"):
+                text = generate_llm_story(data_summary)
+            if not text:
+                st.error("Gemini returned an empty response (this can happen when "
+                         "a safety filter blocks the output). Please try again.")
+            else:
+                st.session_state.llm_story = text
+                st.session_state.enhanced_story = ""
+                st.session_state.enhanced_tone = ""
+                st.session_state.show_diff = False
+                st.rerun()
+        except Exception as e:
+            st.error(f"Story generation failed: {type(e).__name__}. "
+                     f"Check the API key, quota, and network connection.")
 
 
 # ─────────────────────────────────────────────
@@ -1947,7 +1989,7 @@ if st.session_state.llm_story:
         ("Gemini-Generated", st.session_state.llm_story, "#5B5E9D"),
     ]
     if st.session_state.enhanced_story:
-        tone = st.session_state.get("emotion_select", "enhanced")
+        tone = st.session_state.get("enhanced_tone") or "enhanced"
         versions.append((f"Agentic Enhanced · {tone}", st.session_state.enhanced_story, "#DA6B51"))
 
     ccols = st.columns(3, gap="medium")
@@ -1992,15 +2034,27 @@ if st.session_state.llm_story:
                 if report_choice == "Full Comparison"
                 else report_choice
             )
-            pdf_data = build_pdf(pdf_report_choice)
+            # Chart export needs kaleido, and kaleido 1.x is incompatible with
+            # plotly < 6.1. Degrade to a notice rather than a traceback so the app
+            # stays usable in an environment where that pairing is wrong.
+            try:
+                pdf_data = build_pdf(pdf_report_choice)
+            except Exception:
+                pdf_data = None
+                st.warning(
+                    "Report export is unavailable in this environment (chart image "
+                    "export requires kaleido). The on-screen comparison above shows "
+                    "the same metrics."
+                )
 
-            st.download_button(
-                "Download PDF",
-                data=pdf_data,
-                file_name="story_report.pdf",
-                mime="application/pdf",
-                use_container_width=True,
-            )
+            if pdf_data is not None:
+                st.download_button(
+                    "Download PDF",
+                    data=pdf_data,
+                    file_name="story_report.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
 
 st.markdown("---")
 about_col, _ = st.columns([1, 7])
