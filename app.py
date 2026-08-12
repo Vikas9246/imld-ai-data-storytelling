@@ -1305,7 +1305,7 @@ def build_pdf(report_choice):
 # ─────────────────────────────────────────────
 def generate_llm_story(summary):
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash",
         contents=(
             f"Dataset summary:\n{summary}\n\n"
             "Write a data story of about 180–220 words about student depression based strictly on the numbers above. "
@@ -1348,7 +1348,7 @@ EMOTION_MAP = {
 def enhance_story(original_story, summary, emotion="empathetic"):
     instruction = EMOTION_MAP.get(emotion, EMOTION_MAP["empathetic"])
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash",
         contents=(
             f"Original story:\n{original_story}\n\n"
             f"Dataset facts for reference:\n{summary}\n\n"

@@ -171,5 +171,5 @@ The scope was confirmed with supervisor Susmita Khadse in May 2026: the agentic 
 | Interim presentation | June 24, 2026 | ✅ Done |
 | Interface polish + HCI design | July 2026 | 🔄 In progress |
 | User study (if time permits) | July–August 2026 | ⏳ Planned |
-| Final presentation | August 10, 2026 | ⏳ Planned |
-| Final submission | August 16, 2026 | ⏳ Planned |
+| Final presentation | August 12, 2026 | ⏳ Planned |
+| Final submission | August 23, 2026 | ⏳ Planned |
