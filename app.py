@@ -1357,13 +1357,30 @@ EMOTION_MAP = {
     ),
 }
 
-def enhance_story(original_story, summary, emotion="empathetic"):
+def enhance_story(original_story, emotion="empathetic"):
+    """Rewrite a generated story in a different emotional tone.
+
+    The dataset summary is deliberately NOT passed to this function. When the
+    model could see the summary it introduced figures that appear nowhere in
+    ``original_story``, which confounds tone-comparison user studies. Withholding
+    it makes that structurally impossible rather than merely discouraged by the
+    prompt.
+
+    Args:
+        original_story (str): The story to rewrite. It is the only source of
+            facts and figures available to the model.
+        emotion (str): Key into :data:`EMOTION_MAP` selecting the target tone.
+            Defaults to ``"empathetic"``; unknown keys fall back to that tone.
+
+    Returns:
+        str: The rewritten story, stripped of surrounding whitespace. Returns
+        ``""`` when the response is empty or blocked by a safety filter.
+    """
     instruction = EMOTION_MAP.get(emotion, EMOTION_MAP["empathetic"])
     response = client.models.generate_content(
         model="gemini-3.5-flash",
         contents=(
             f"Original story:\n{original_story}\n\n"
-            f"Dataset facts for reference:\n{summary}\n\n"
             "Rewrite the story with the requested emotional tone. "
             "Keep EVERY number and statistic exactly as written."
         ),
@@ -1372,7 +1389,11 @@ def enhance_story(original_story, summary, emotion="empathetic"):
                 f"You are an expert in emotional data storytelling. "
                 f"Rewrite the story to be {instruction} "
                 f"Do NOT change any number, percentage, or factual claim. "
-                f"Do NOT add data points not present in the original story or dataset summary. "
+                f"Do NOT introduce any number, percentage, or statistic that does not already "
+                f"appear in the original story. Every figure in your output must be traceable "
+                f"to the original story. "
+                f"Keep the rewrite close to the length of the original — within roughly 10 "
+                f"percent of its word count. "
                 f"Output plain paragraphs only — no bullet points, no headers."
             )
         ),
@@ -1859,9 +1880,7 @@ with center_col:
                     # RerunException (a BaseException), so `except Exception` is safe.
                     try:
                         with st.spinner(f"Agent rewriting as '{emotion}'…"):
-                            text = enhance_story(
-                                st.session_state.llm_story, data_summary, emotion
-                            )
+                            text = enhance_story(st.session_state.llm_story, emotion)
                         if not text:
                             st.error("The agent returned an empty response (this can "
                                      "happen when a safety filter blocks the output). "
